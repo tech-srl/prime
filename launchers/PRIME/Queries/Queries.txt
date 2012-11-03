@@ -1,0 +1,44 @@
+org\.openqa\.selenium\..*
+public class $Search {
+	public void f() {
+		org.openqa.selenium.WebDriver d = new org.openqa.selenium.firefox.FirefoxDriver();
+		Something.unknown1(d);
+		org.openqa.selenium.By by = Something.unknown2();
+		org.openqa.selenium.WebElement e = d.findElement(by);
+		Something.unknown3(e);
+		e.clear();
+		Something.unknown4(e);
+		e.submit();
+	}
+}
+public class $Search {
+	public void f() {
+		org.openqa.selenium.WebDriver d = new org.openqa.selenium.firefox.FirefoxDriver();
+		Something.unknown1(d);
+		org.openqa.selenium.By by = Something.unknown2();
+		org.openqa.selenium.WebElement e = d.findElement(by);
+		Something.unknown3(e);
+		e.click();
+	}
+}
+
+java\.sql\..*
+public class $Search {
+	public void f() {
+		java.sql.Connection c = Something.unknown1();
+		Something.unknown2(c);
+		java.sql.Statement s = c.createStatement();
+	}
+}
+
+org\.apache\.commons\.net\..*
+public class $Search {
+	public void f(java.lang.String server, java.lang.String remote, java.io.InputStream in) {
+		org.apache.commons.net.ftp.FTPClient ftp = new org.apache.commons.net.ftp.FTPClient();
+		ftp.connect(server);
+		Something.unknown1(ftp);
+		ftp.storeFile(remote, in);
+		Something.unknown2(ftp);
+		ftp.disconnect();
+	}
+}

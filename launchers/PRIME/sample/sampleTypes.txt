@@ -1,0 +1,17 @@
+java.util
+java.io
+javax.swing.JPanel
+org.eclipse.debug.ui.IDebugView
+org.eclipse.debug.ui.*
+org.eclipse.swt
+org.hibernate
+com.android.browser
+com.android.*
+org.springframework.*
+java.sql.*
+ResultSet
+getDocumentProvider
+DocumentProviderRegistry
+IDebugView JavaInspectExpression
+IStructuredSelection
+FigureCanvas

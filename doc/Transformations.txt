@@ -1,0 +1,85 @@
+Definitions
+===========
+ProgramState = Collection of AbstractObject
+AbstractObject = <Label, Must, May, MustNot, Unique, History>
+
+Everything below treats May as a group; but it can also be implemented as a bit, where
+its initial state is false if the may set should not be empty, true otherwise.
+
+Previous State | Operation | New state
+---------------+-----------+----------
+false          | U {x}     | true
+false          | \ {x}     | false
+true           | U {x}     | true
+true           | \ {x}     | true
+
+And of course, the question of "is x \in May?" becomes "is May true?".
+
+
+
+We want to answer the following questions:
+==========================================
+1. Given a statement, what is its effect on the current ProgramState?
+  1.1. x = y
+  1.2. x.f(a)
+  1.3 x = new T(a);
+2. How do we join two ProgramStates?
+  We group the AbstractObjects and join all the AbstractObjects that belong to the same group.
+  2.1. When should two AbstractObjects belong to the same group?
+  2.2. How do we join two AbstractObjects?
+3. What happens to the history during a loop?
+4. How does a freshly-created ProgramState look like?
+5. How do we deal with a previously-unencountered access path?
+  5.1 We create a fresh AbstractObject. How does it look like?
+
+
+1.1. x = y
+==========
+For each AbstractObject in the "before" state, create a new AbstractObject in the "after" state, according to whether x and y must, may or must not point
+to that AbstractObject:
+
+AbstractObject=<Label, Must, May, MustNot, Unique, History>
+
+x        | y        | Output object                                                  | Rationale
+---------+----------+----------------------------------------------------------------+-----------------------------------------------
+must     | must     | <Label, Must,       May,       MustNot,       Unique, History> | unchanged
+may      | must     | <Label, Must U {x}, May \ {x}, MustNot,       Unique, History> | something like x.a in "may" will remain there
+must_not | must     | <Label, Must U {x}, May,       MustNot \ {x}, Unique, History> | TODO fix
+must     | may      | <Label, Must \ {x}, May U {x}, MustNot,       Unique, History> | TODO fix
+may      | may      | <Label, Must,       May U {x}, MustNot,       Unique, History> | TODO fix
+must_not | may      | <Label, Must,       May U {x}, MustNot \ {x}, Unique, History> | TODO fix
+must     | must_not | <Label, Must \ {x}, May,       MustNot U {x}, Unique, History> | TODO fix
+may      | must_not | <Label, Must,       May \ {x}, MustNot U {x}, Unique, History> | TODO fix
+must_not | must_not | <Label, Must,       May,       MustNot U {x}, Unique, History> | TODO fix
+
+
+
+1.2 x.f()
+=========
+For each AbstractObject in the in state, create one or more new AbstractObjects, according to whether x must, may or must not point
+to that AbstractObject, and according to whether it's unique or not:
+
+x        | Unique | Output object(s)                                         | Rationale
+---------+--------+----------------------------------------------------------+---------------------------------------------------------
+must     | false  | <Label, {x}, False, MustNot, true, extend(History, f)>   | This is a uniqueness focus - one item becomes unique and receives a
+         |        | <Label, Must\{X}, May, MustNot \cup {x}, false, History> | strong update, the other is losing X from must.
+may      | false  |
+must_not | false  | <Label, Must, May, MustNot, Unique, History>             | unchanged
+must     | true   | <Label, Must, May, MustNot, Unique, extend(History, f)>  | Strong update
+may      | true   |
+must_not | true   | <Label, Must, May, MustNot, Unique, History>             | unchanged
+
+
+
+2.1 When should two AbstractObjects belong to the same group?
+=============================================================
+When Label_1 = Label_2, Must_1 = Must_2, May_1 = May_2, MustNot_1 = MustNot_2
+
+
+
+2.2 How do we join two AbstractObjects?
+=======================================
+<Label_1, Must_1, May_1, MustNot_1, Unique_1 \and Unique_2, join(History_1, History_2)>
+
+
+

@@ -1,0 +1,11 @@
+com.aetrion.flickr
+java.io.FileOutputStream
+java.sql
+.*
+org.apache.commons.net.ftp.FTPClient
+org.apache.commons.cli
+enterLocalPassiveMode
+ReloadingClassLoader
+org.apache.commons.cli
+org.apache.maven
+org.hibernate

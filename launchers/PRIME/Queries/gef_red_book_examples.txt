@@ -1,0 +1,7 @@
+org\.eclipse\.gef\..*
+Example 1
+public class $Search {
+	public void f() {
+		org.eclipse.gef.GraphicalViewer v = Something.unknown1();
+	}
+}

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            label="Prime"
+            visible="true"
+            id="technion.prime.actionSet">
+         <menu
+               label="Pri&amp;me"
+               id="primeMenu">
+            <separator
+                  name="primeGroup">
+            </separator>
+         </menu>
+         <action
+               class="technion.prime.eclipse.actions.PrimeLocalAction"
+               icon="res/icons/mine.gif"
+               id="technion.prime.actions.LocalPrime"
+               label="Run Prime in &amp;Local Mode"
+               menubarPath="primeMenu/primeGroup"
+               tooltip="Mine API">
+         </action>
+         <action
+               class="technion.prime.eclipse.actions.PrimeMineAction"
+               icon="res/icons/mine.gif"
+               id="technion.prime.actions.MineApiAction"
+               label="&amp;Mine API with Prime"
+               menubarPath="primeMenu/primeGroup"
+               tooltip="&amp;Mine API with Prime">
+         </action>
+         <action
+               class="technion.prime.eclipse.actions.CodeSearchAction"
+               icon="res/icons/mine.gif"
+               id="technion.prime.actions.CodeSearchAction"
+               label="&amp;Code Search on Prime"
+               menubarPath="primeMenu/primeGroup"
+               style="push"
+               toolbarPath="primeGroup"
+               tooltip="&amp;Code Search on Prime">
+         </action>
+      </actionSet>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="technion.prime.eclipse.preferences.PrimePreferences"
+            id="technion.prime.preferences.PrimePreferences"
+            name="Prime">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="technion.prime.eclipse.preferences.PreferenceInitializer">
+      </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="PrimeResultsView"
+            name="Prime">
+      </category>
+      <view
+            category="PrimeResultsView"
+            class="technion.prime.eclipse.views.TreeResultsView"
+            icon="icons/sample.gif"
+            id="technion.prime.eclipse.views.TreeResultsView"
+            name="Prime Tree Results View"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.help.contexts">
+      <contexts
+            file="contexts.xml">
+      </contexts>
+   </extension>
+   <extension
+         id="CommandLine"
+         point="org.eclipse.core.runtime.applications">
+      <application
+            cardinality="singleton-global"
+            thread="main"
+            visible="true">
+         <run
+               class="technion.prime.eclipse.EclipseApplication">
+         </run>
+      </application>
+   </extension>
+
+</plugin>
