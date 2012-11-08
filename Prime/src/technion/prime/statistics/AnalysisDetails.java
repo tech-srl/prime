@@ -272,6 +272,33 @@ public class AnalysisDetails extends FieldHolder {
 		sb.append("</html>\n");
 	}
 
+	public void writeHierarchyFile(String folder, String filename) throws IOException {
+		String content = new String();
+		StringBuffer result = new StringBuffer();
+		for (Sample s : samples) {
+			result.append(addSampleToHierarchy(content, s));
+		}
+
+		String fullname = folder + File.separator + filename;
+		FileUtils.writeStringToFile(new File(fullname), result.toString());
+	}
+	
+	private String addSampleToHierarchy(String h,Sample s) {
+		StringBuffer content = new StringBuffer();
+		if (s.getSamples().isEmpty())
+			return h;
+		for (Sample child : s.getSamples()) {
+			content.append(child.id + ", " + s.id + "\n");
+			if (child.id.equals(s.id)) {
+				throw new RuntimeException("This should not have happened, child and parent have the same id " + s.id);
+			}
+			content.append(addSampleToHierarchy(h, child));
+			System.out.println("Content : " + content);
+		}
+		return h + content.toString();
+	}
+	
+
 	private void addHtmlSample(StringBuilder sb, Sample s, String folder) throws IOException {
 		// Write header:
 		sb.append("<p style=\"margin-left: 20px\" align=\"left\">\n");
@@ -286,7 +313,7 @@ public class AnalysisDetails extends FieldHolder {
 		// Write image:
 		String filename = s.id;
 		History h = getSampleHistory(s);
-		h.generateGraphvizOutput(folder, filename);
+		h.writeGraphvizFile(folder, filename, s.id);
 
 		// URL image = path2url(dot2img(filename, folder));
 		String image = filename + "." + DOT_IMAGE_EXTENSION;

@@ -872,8 +872,9 @@ public class EdgeHistory implements History {
 	 */
 	private String getGvFilename(String outputPath, int counter) {
 		String result = "";
-		result += "History_" + counter;
-		result = outputPath + File.separator + result + GRAPHVIZ_SUFFIX;
+		//result += "History_" + counter;
+		result += "Sample" + counter;
+		//result = outputPath + File.separator + result;
 		return result;
 	}
 
@@ -892,9 +893,9 @@ public class EdgeHistory implements History {
 	/**
 	 * @return Graphviz file content.
 	 */
-	private String getGvContent() {
+	private String getGvContent(String graphId) {
 		StringBuilder sb = new StringBuilder();
-		appendGvFileHeader(sb, getTitle());
+		appendGvFileHeader(sb, getTitle(),graphId);
 		Map<EdgeNode, String> nodeNames = appendGvNodes(sb);
 		Set<Edge> edgesOnHeaviestRoute = findEdgesOnHeaviestRoute();
 		for (Edge e : edges) {
@@ -1025,8 +1026,11 @@ public class EdgeHistory implements History {
 		return s;
 	}
 
-	private void appendGvFileHeader(StringBuilder sb, String label) {
-		sb.append("digraph finite_state_machine {\n" +
+	private void appendGvFileHeader(StringBuilder sb, String label, String graphid) {
+		if (graphid == null) {
+			graphid = "G";
+		}
+		sb.append("digraph " + graphid + " {\n" +
 				"\tlabel = \"" + label + "\";\n" +
 				"\tlabelloc = \"t\";\n" +
 				"\trankdir=LR;\n" +
@@ -1892,16 +1896,28 @@ public class EdgeHistory implements History {
 			addEdge(newEdge);
 		}
 	}
-
-	@Override
-	public String generateGraphvizOutput(String outputPath, String filename) throws IOException {
-		String content = getGvContent();
+	
+	public String writeGraphvizFile(String outputPath, String filename, String graphId) throws IOException {
+		String content = getGvContent(graphId);
 
 		filename = outputPath + File.separator + filename + GRAPHVIZ_SUFFIX;
 
 		FileUtils.writeStringToFile(new File(filename), content);
 
 		Logger.log("wrote history to " + filename);
+
+		return filename;
+	}
+	
+	@Override
+	public String generateGraphvizOutput(String outputPath, String filename) throws IOException {
+		String content = getGvContent(null);
+
+		filename = outputPath + File.separator + filename + GRAPHVIZ_SUFFIX;
+
+		FileUtils.writeStringToFile(new File(filename), content);
+
+		//Logger.log("wrote history to " + filename);
 
 		return filename;
 	}

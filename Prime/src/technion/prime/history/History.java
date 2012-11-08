@@ -150,6 +150,8 @@ public interface History extends Cloneable, Serializable {
 
 	String generateGraphvizOutput(String outputPath, String fileName) throws IOException;
 	
+	String writeGraphvizFile(String outputPath, String filename, String graphId) throws IOException;
+	
 	/**
 	 * Generate an output xml file from this history.
 	 * @param outputFolder Folder to save the file to.

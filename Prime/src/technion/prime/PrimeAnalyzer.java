@@ -202,6 +202,7 @@ public class PrimeAnalyzer {
 		AnalysisDetails details = options.getOngoingAnalysisDetails();
 		try {	
 			details.saveToHtml(options.getOutputDir(), "index.html");
+			details.writeHierarchyFile(options.getOutputDir(), "hierarchy.txt");
 			Logger.log("HTML Report file saved");
 		} catch (IOException e) {
 			Logger.warn("Could not save HTML report file, skipping.");
