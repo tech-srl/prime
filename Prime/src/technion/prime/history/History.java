@@ -1,13 +1,14 @@
 package technion.prime.history;
 
-import technion.prime.Options;
-import technion.prime.dom.AppType;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Set;
 
+import technion.prime.Options;
 import technion.prime.dom.AppMethodRef;
+import technion.prime.dom.AppType;
+import technion.prime.history.edgeset.Edge;
+import technion.prime.history.edgeset.EdgeNode;
 import technion.prime.utils.Logger.CanceledException;
 
 /**
@@ -240,4 +241,14 @@ public interface History extends Cloneable, Serializable {
 	Set<Ordering> getOrderings();
 	
 	History eliminateUnknowns(HistoryCollection base) throws InterruptedException, CanceledException;
+
+	Set<Edge> edges();
+
+	Set<EdgeNode> nodes();
+	
+	public EdgeNode root();
+
+	boolean isActive(EdgeNode n);
+
+	Set<Edge> getOutgoingEdges(EdgeNode n);
 }

@@ -2,8 +2,6 @@ package technion.prime.statistics;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -13,13 +11,14 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import technion.prime.Options;
-
 import technion.prime.dom.AppClass;
 import technion.prime.dom.AppType;
 import technion.prime.history.History;
 import technion.prime.history.HistoryCollection;
+import technion.prime.utils.FileExtensions;
 import technion.prime.utils.Logger;
 import technion.prime.utils.Logger.CanceledException;
+import technion.prime.utils.SampleWriter;
 
 
 public class AnalysisDetails extends FieldHolder {
@@ -241,8 +240,6 @@ public class AnalysisDetails extends FieldHolder {
 			Sample.AVG_DEGREE
 	};
 
-	private static String DOT_IMAGE_EXTENSION = "svg";
-
 	public void saveToHtml(String folder, String indexFilename) throws IOException {
 		StringBuilder sb = new StringBuilder();
 		appendHtmlHeader(sb);
@@ -272,31 +269,7 @@ public class AnalysisDetails extends FieldHolder {
 		sb.append("</html>\n");
 	}
 
-	public void writeHierarchyFile(String folder, String filename) throws IOException {
-		String content = new String();
-		StringBuffer result = new StringBuffer();
-		for (Sample s : samples) {
-			result.append(addSampleToHierarchy(content, s));
-		}
 
-		String fullname = folder + File.separator + filename;
-		FileUtils.writeStringToFile(new File(fullname), result.toString());
-	}
-	
-	private String addSampleToHierarchy(String h,Sample s) {
-		StringBuffer content = new StringBuffer();
-		if (s.getSamples().isEmpty())
-			return h;
-		for (Sample child : s.getSamples()) {
-			content.append(child.id + ", " + s.id + "\n");
-			if (child.id.equals(s.id)) {
-				throw new RuntimeException("This should not have happened, child and parent have the same id " + s.id);
-			}
-			content.append(addSampleToHierarchy(h, child));
-			System.out.println("Content : " + content);
-		}
-		return h + content.toString();
-	}
 	
 
 	private void addHtmlSample(StringBuilder sb, Sample s, String folder) throws IOException {
@@ -313,10 +286,11 @@ public class AnalysisDetails extends FieldHolder {
 		// Write image:
 		String filename = s.id;
 		History h = getSampleHistory(s);
-		h.writeGraphvizFile(folder, filename, s.id);
-
+		//h.writeGraphvizFile(folder, filename, s.id);
+		SampleWriter.write(s,h,folder,filename);
+		
 		// URL image = path2url(dot2img(filename, folder));
-		String image = filename + "." + DOT_IMAGE_EXTENSION;
+		String image = filename + "." + FileExtensions.DOT_IMAGE_EXTENSION;
 		sb.append(String.format("<a href=\"%s\"><img src=\"%s\" /></a>\n", image, image));
 		// Write children:
 		for (Sample child : s.getSamples()) {
@@ -333,33 +307,7 @@ public class AnalysisDetails extends FieldHolder {
 	// return new File(s.id).exists();
 	// }
 
-	private String dot2img(String dotPath, String outFolder) {
-		String outFile = FilenameUtils.getBaseName(dotPath) + "." + DOT_IMAGE_EXTENSION;
-		// String outFile = FilenameUtils.concat(outFolder, FilenameUtils.getBaseName(dotPath) + "."
-		// + DOT_IMAGE_EXTENSION);
-		// String command = String.format(
-		// "%s -o%s -T%s -q %s",
-		// options.getDotExecutablePath(), outFile, DOT_IMAGE_EXTENSION, dotPath);
-		// // try {
-		// Runtime.getRuntime().exec(command).waitFor();
-		// } catch (IOException e) {
-		// Logger.exception(e);
-		// return null;
-		// } catch (InterruptedException e) {
-		// Logger.exception(e);
-		// return null;
-		// }
-		return outFile;
-	}
 
-	private URL path2url(String path) {
-		try {
-			return new File(path).toURI().toURL();
-		} catch (MalformedURLException e) {
-			Logger.exception(e);
-			return null;
-		}
-	}
 
 	public void setFinalHistoryCollection(HistoryCollection hc) {
 		finalHistoryCollection = hc;
@@ -367,6 +315,10 @@ public class AnalysisDetails extends FieldHolder {
 
 	public HistoryCollection getFinalHistoryCollection() {
 		return finalHistoryCollection;
+	}
+
+	public void writeHierarchyFile(String folder, String filename) throws IOException {
+		SampleWriter.writeHierarchyFile(samples,folder, filename);
 	}
 
 }

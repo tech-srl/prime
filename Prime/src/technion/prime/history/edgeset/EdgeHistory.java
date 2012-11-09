@@ -1922,4 +1922,18 @@ public class EdgeHistory implements History {
 		return filename;
 	}
 
+	@Override
+	public Set<Edge> edges() {
+		return edges;
+	}
+
+	@Override
+	public Set<EdgeNode> nodes() {
+		return nodes;
+	}
+	
+	public EdgeNode root() {
+		return root;
+	}
+
 }

@@ -10,12 +10,12 @@ import java.util.Set;
 public class Sample extends FieldHolder {
 	public static long sampleCount = 0;
 	public static Field NAME = new Field("name", String.class);
-	public static Field NUM_SAMPLES = new Field("# samples", Integer.class);
-	public static Field PERCENTAGE_SAMPLES = new Field("% samples", Double.class);
+	public static Field NUM_SAMPLES = new Field("num samples", Integer.class);
+	public static Field PERCENTAGE_SAMPLES = new Field("perc samples", Double.class);
 	public static Field SIZE = new Field("size", Integer.class);
 	public static Field DEPTH = new Field("depth", Integer.class);
-	public static Field MAX_DEGREE = new Field("degree", Integer.class);
-	public static Field AVG_DEGREE = new Field("degree", Double.class);
+	public static Field MAX_DEGREE = new Field("max degree", Integer.class);
+	public static Field AVG_DEGREE = new Field("avg degree", Double.class);
 	public static Field MAX_WEIGHT = new Field("max weight", Double.class);
 	public static Field AVG_WEIGHT = new Field("avg weight", Double.class);
 	public static Field NUM_TYPES = new Field("# types", Integer.class);
@@ -48,4 +48,9 @@ public class Sample extends FieldHolder {
 	public void setParent(Sample s) {
 		parent = s;
 	}
+	
+	public String getId() {
+		return id;
+	}
+	
 }
