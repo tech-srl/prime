@@ -186,5 +186,8 @@ public interface Options extends Serializable {
 	 * analysis.
 	 */
 	AnalysisDetails getOngoingAnalysisDetails();
+	
+	
+	boolean separateUnknownSources();
 
 }

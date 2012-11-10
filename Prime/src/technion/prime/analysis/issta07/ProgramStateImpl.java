@@ -33,7 +33,7 @@ public class ProgramStateImpl implements ProgramState {
 	private Set<AbstractObject> objects;
 	private Set<AppAccessPath> seenAccessPaths;
 	private AppMethodDecl method;
-	
+
 	public ProgramStateImpl(Options options) {
 		this.options = options;
 		objects = createObjectSet();
@@ -73,8 +73,9 @@ public class ProgramStateImpl implements ProgramState {
 		}
 		objects = newObjects;
 	}
-	
-	private MultiMap<AbstractObject, History> createMergeBuckets() throws InterruptedException, CanceledException {
+
+	private MultiMap<AbstractObject, History> createMergeBuckets() throws InterruptedException,
+			CanceledException {
 		MultiMap<AbstractObject, History> result = new MultiMap<AbstractObject, History>();
 		for (AbstractObject obj1 : objects) {
 			ConcurrencyUtils.checkState();
@@ -94,9 +95,10 @@ public class ProgramStateImpl implements ProgramState {
 		return result;
 	}
 
-	private boolean shouldBeMerged(AbstractObject obj1, AbstractObject obj2) throws InterruptedException, CanceledException {
-//		return obj1.morePreciseWithoutHistoryThan(obj2) ||
-//				obj2.morePreciseWithoutHistoryThan(obj1);
+	private boolean shouldBeMerged(AbstractObject obj1, AbstractObject obj2)
+			throws InterruptedException, CanceledException {
+		// return obj1.morePreciseWithoutHistoryThan(obj2) ||
+		// obj2.morePreciseWithoutHistoryThan(obj1);
 		return obj1.sameContentWithoutHistory(obj2);
 	}
 
@@ -137,17 +139,17 @@ public class ProgramStateImpl implements ProgramState {
 			newObjects.add(obj.assignment(lhs, null));
 		}
 		objects = newObjects;
-		
-		AbstractObject newObj = lhs.getType().isPrimitive()?
+
+		AbstractObject newObj = lhs.getType().isPrimitive() ?
 				createFreshObject(l, lhs) :
-				createStaleObject(l, lhs, Collections.<AppAccessPath>emptySet());
-		
+				createStaleObject(l, lhs, Collections.<AppAccessPath> emptySet());
+
 		// Creation context
 		if (isBaseTracked(receiver)) {
 			History h = getHistoryOf(receiver);
 			if (h != null) newObj.setHistory(h);
 		}
-		
+
 		objects.add(newObj);
 		removeRedundantObjects();
 		seenAccessPaths.add(lhs.getAccessPath());
@@ -160,19 +162,20 @@ public class ProgramStateImpl implements ProgramState {
 		if (rhs != null && rhs.isNull() == false) addNewObjectIfMissing(l, rhs);
 
 		Set<AbstractObject> newObjects = createObjectSet();
-		
+
 		for (AbstractObject obj : objects) {
 			ConcurrencyUtils.checkState();
 			newObjects.add(obj.assignment(lhs, rhs));
 		}
-		
+
 		objects = newObjects;
 		removeRedundantObjects();
 		seenAccessPaths.add(lhs.getAccessPath());
 	}
 
 	@Override
-	public void assignmentFromAllOf(Label l, AppObject lhs, Iterable<? extends AppObject> rhss) throws InterruptedException, CanceledException {
+	public void assignmentFromAllOf(Label l, AppObject lhs, Iterable<? extends AppObject> rhss)
+			throws InterruptedException, CanceledException {
 		Set<AbstractObject> newObjects = createObjectSet();
 		for (AppObject rhs : rhss) {
 			for (AbstractObject obj : objects) {
@@ -186,7 +189,8 @@ public class ProgramStateImpl implements ProgramState {
 	}
 
 	@Override
-	public void assignmentFromUntracked(Label l, SootAppObject lhs) throws InterruptedException, CanceledException {
+	public void assignmentFromUntracked(Label l, SootAppObject lhs) throws InterruptedException,
+			CanceledException {
 		Set<AbstractObject> newObjects = createObjectSet();
 		for (AbstractObject obj : objects) {
 			ConcurrencyUtils.checkState();
@@ -200,36 +204,36 @@ public class ProgramStateImpl implements ProgramState {
 	@Override
 	public void methodCall(Label l, AppObject receiver, AppMethodRef m,
 			Iterable<? extends AppObject> args) throws InterruptedException, CanceledException {
-		
+
 		if (receiver != null) {
 			methodCallWithNonNullReceiver(l, receiver, m, args);
 		}
-		
+
 		if (m.isPhantom() && m.isTransparent()) {
 			for (AppObject arg : args) {
 				AppType t = arg.getType();
 				AppMethodRef unknownMethod = new UnknownMethod(t, m);
-				methodCall(l, arg, unknownMethod, Collections.<AppObject>emptySet());
+				methodCall(l, arg, unknownMethod, Collections.<AppObject> emptySet());
 			}
 		} else if (m.isOpaque() && receiver == null) {
 			for (AppObject arg : args) {
-				methodCall(l, arg, m, Collections.<AppObject>emptySet());
+				methodCall(l, arg, m, Collections.<AppObject> emptySet());
 			}
 		}
-		
+
 		removeRedundantObjects();
 	}
 
 	private void methodCallWithNonNullReceiver(Label l, AppObject receiver, AppMethodRef m,
 			Iterable<? extends AppObject> args) throws InterruptedException, CanceledException {
 		if (isBaseTracked(receiver) == false) return;
-		
+
 		Set<Label> labelsPointedToByReceiver = new HashSet<Label>();
 		for (AbstractObject obj : objects) {
 			ConcurrencyUtils.checkState();
 			if (obj.mustBe(receiver)) labelsPointedToByReceiver.add(obj.getLabel());
 		}
-		
+
 		Set<AbstractObject> newObjects = new HashSet<AbstractObject>();
 		for (AbstractObject obj : objects) {
 			newObjects.addAll(
@@ -262,52 +266,53 @@ public class ProgramStateImpl implements ProgramState {
 		}
 		objects = newObjects;
 	}
-	
+
 	private ProgramStateImpl downcast(Object o) {
-		return (ProgramStateImpl)o;
+		return (ProgramStateImpl) o;
 	}
-	
+
 	/**
-	 * Remove spurious AbstractObjects: objects for which this state already contains
-	 * a more precise object.
-	 * @throws CanceledException 
-	 * @throws InterruptedException 
+	 * Remove spurious AbstractObjects: objects for which this state already contains a more precise
+	 * object.
+	 * 
+	 * @throws CanceledException
+	 * @throws InterruptedException
 	 */
 	private void removeRedundantObjects() throws InterruptedException, CanceledException {
 		return;
-//		Set<AbstractObject> toRemove = new HashSet<AbstractObject>();
-//		for (AbstractObject obj1 : objects) {
-//			for (AbstractObject obj2 : objects) {
-//				ConcurrencyUtils.checkState();
-//				if (obj1 == obj2) continue;
-//				if (obj1.sameContent(obj2)) toRemove.add(obj1);
-////				if (obj1.morePreciseThan(obj2)) toRemove.add(obj1);
-//			}
-//		}
-//		objects.removeAll(toRemove);
+		// Set<AbstractObject> toRemove = new HashSet<AbstractObject>();
+		// for (AbstractObject obj1 : objects) {
+		// for (AbstractObject obj2 : objects) {
+		// ConcurrencyUtils.checkState();
+		// if (obj1 == obj2) continue;
+		// if (obj1.sameContent(obj2)) toRemove.add(obj1);
+		// // if (obj1.morePreciseThan(obj2)) toRemove.add(obj1);
+		// }
+		// }
+		// objects.removeAll(toRemove);
 	}
-	
+
 	private Set<AbstractObject> createObjectSet() {
 		return new HashSet<AbstractObject>();
 	}
-	
+
 	private AbstractObject createFreshObject(Label l, AppObject lhs) {
-		return new AbstractObject(options, l, lhs, true, Collections.<AppAccessPath>emptySet());
+		return new AbstractObject(options, l, lhs, true, Collections.<AppAccessPath> emptySet());
 	}
-	
+
 	private AbstractObject createStaleObject(Label l,
 			AppObject lhs, Set<AppAccessPath> seenAccessPaths)
-					throws InterruptedException, CanceledException {
+			throws InterruptedException, CanceledException {
 		AbstractObject result =
-				new AbstractObject(options, l, lhs, ! options.isMayAnalysis(), seenAccessPaths);
+				new AbstractObject(options, l, lhs, !options.isMayAnalysis(), seenAccessPaths);
 		result.getHistory().extendWithMethodCall(new UnknownMethod(lhs.getType(), null), 1);
 		return result;
 	}
-	
+
 	/**
 	 * @param appObj
 	 * @return A cloned version of the merge of all histories associated with appObj, or null if
-	 * there is no such history.
+	 *         there is no such history.
 	 */
 	private History getHistoryOf(AppObject appObj) throws InterruptedException, CanceledException {
 		History h = null;
@@ -320,8 +325,9 @@ public class ProgramStateImpl implements ProgramState {
 		}
 		return h;
 	}
-	
-	private void addNewObjectIfMissing(Label l, AppObject appObj) throws InterruptedException, CanceledException {
+
+	private void addNewObjectIfMissing(Label l, AppObject appObj) throws InterruptedException,
+			CanceledException {
 		AppAccessPath objAp = appObj.getAccessPath();
 		if (seenAccessPaths.contains(objAp)) return;
 		Set<AbstractObject> newObjects = createObjectSet();
@@ -338,15 +344,15 @@ public class ProgramStateImpl implements ProgramState {
 		seenAccessPaths.add(objAp);
 		objects = newObjects;
 	}
-	
+
 	private boolean isTrackedType(AppType t) {
 		return options.getFilterReported().passesFilter(t.getFullName());
 	}
-	
+
 	private boolean isBaseTracked(AppObject appObj) {
 		return options.getFilterBaseTracked().passesFilter(appObj.getType().getFullName());
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -366,15 +372,16 @@ public class ProgramStateImpl implements ProgramState {
 		sb.append("\n}");
 		return sb.toString();
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof ProgramStateImpl == false) return false;
 		ProgramStateImpl psi = downcast(obj);
 		if (seenAccessPaths.equals(psi.seenAccessPaths) == false) return false;
-		
+
 		return CollectionUtils.sameElements(objects, psi.objects, new Comparator<AbstractObject>() {
-			@Override public int compare(AbstractObject o1, AbstractObject o2) {
+			@Override
+			public int compare(AbstractObject o1, AbstractObject o2) {
 				try {
 					return o1.sameContent(o2) ? 0 : 1;
 				} catch (InterruptedException e) {
@@ -392,11 +399,14 @@ public class ProgramStateImpl implements ProgramState {
 	}
 
 	@Override
-	public void assignmentFromNewParameter(Label l, SootAppObject obj) throws InterruptedException, CanceledException {
+	public void assignmentFromNewParameter(Label l, SootAppObject obj) throws InterruptedException,
+			CanceledException {
 		if (seenAccessPaths.contains(obj.getAccessPath())) return;
 		AbstractObject result =
-				new AbstractObject(options, l, obj, ! options.isMayAnalysis(), seenAccessPaths);
-		result.getHistory().extendWithMethodCall(new UnknownMethodFromParam(obj.getType()), 1);
+				new AbstractObject(options, l, obj, !options.isMayAnalysis(), seenAccessPaths);
+		AppMethodRef amr = options.separateUnknownSources() ? new UnknownMethodFromParam(
+				obj.getType()) : new UnknownMethod(obj.getType(), null);
+		result.getHistory().extendWithMethodCall(amr, 1);
 		objects.add(result);
 		seenAccessPaths.add(obj.getAccessPath());
 	}
@@ -409,11 +419,15 @@ public class ProgramStateImpl implements ProgramState {
 			return;
 		}
 		AbstractObject result =
-				new AbstractObject(options, l, rhs, ! options.isMayAnalysis(), seenAccessPaths);
+				new AbstractObject(options, l, rhs, !options.isMayAnalysis(), seenAccessPaths);
 		seenAccessPaths.add(rhs.getAccessPath());
 		result = result.assignment(lhs, rhs);
 		seenAccessPaths.add(lhs.getAccessPath());
-		result.getHistory().extendWithMethodCall(new UnknownMethodFromField(lhs.getType(), annotations), 1);
+
+		AppMethodRef amr = options.separateUnknownSources() ? new UnknownMethodFromField(
+				lhs.getType(), annotations) : new UnknownMethod(lhs.getType(), null);
+
+		result.getHistory().extendWithMethodCall(amr, 1);
 		objects.add(result);
 	}
 
