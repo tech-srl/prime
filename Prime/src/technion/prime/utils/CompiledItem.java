@@ -27,4 +27,7 @@ public abstract class CompiledItem {
 	public String getBasePath() {
 		return basePath;
 	}
+	
+	
+	
 }

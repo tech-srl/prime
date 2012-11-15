@@ -37,5 +37,7 @@ public abstract class SootSceneItem {
 		return true;
 	}
 
-	
+	public void deleteScene() {
+		this.scene = null;
+	}
 }

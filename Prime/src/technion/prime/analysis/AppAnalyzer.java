@@ -12,6 +12,7 @@ import technion.prime.utils.Logger;
 import technion.prime.dom.App;
 import technion.prime.dom.AppClass;
 import technion.prime.dom.AppMethodDecl;
+import technion.prime.dom.soot.SootApp;
 import technion.prime.history.History;
 import technion.prime.history.HistoryCollection;
 import technion.prime.history.converters.AutomataSameClusterer;
@@ -60,8 +61,13 @@ public class AppAnalyzer {
 				//a.unloadClass(c);
 			} catch (InterruptedException e) {
 				continue;
-			}
+			} 
 		}
+		// cleanup internal soot static info
+		SootApp.reset();
+		// hopefully make system collect all Soot garbage
+		System.gc();
+		
 		Logger.endStage(String.format("analyzed %d/%d classes, got %d nodes in %d abstract objects.",
 				analyzed, classCount, hc.getNumNodes(), hc.getNumHistories()));
 		

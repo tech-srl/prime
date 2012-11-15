@@ -111,6 +111,9 @@ public class SootFlowAnalysis extends ForwardFlowAnalysis<Unit, ProgramState> {
 			if (inner instanceof CanceledException) throw (CanceledException)inner;
 			if (inner instanceof RuntimeException) throw (RuntimeException)inner;
 			assert(false);
+		} catch (Exception e) {
+			//e.printStackTrace();
+			Logger.error(e.getMessage());
 		}
 		
 		ProgramState finalState = options.newProgramState();

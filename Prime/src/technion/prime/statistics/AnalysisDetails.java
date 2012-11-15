@@ -41,8 +41,8 @@ public class AnalysisDetails extends FieldHolder {
 	private Set<Sample> samples = new HashSet<Sample>();
 	private Set<String> uncompilableSources = new HashSet<String>();
 	private Set<AppClass> unanalyzableClasses = new HashSet<AppClass>();
-	private Map<AppType, Integer> seenAsReturnType = new HashMap<AppType, Integer>();
-	private Map<AppType, Integer> seenAsParameterType = new HashMap<AppType, Integer>();
+	//private Map<AppType, Integer> seenAsReturnType = new HashMap<AppType, Integer>();
+	//private Map<AppType, Integer> seenAsParameterType = new HashMap<AppType, Integer>();
 	private Map<History, Sample> sampleByHistory = new HashMap<History, Sample>();
 	private Map<Sample, History> historyBySample = new HashMap<Sample, History>();
 
@@ -59,25 +59,32 @@ public class AnalysisDetails extends FieldHolder {
 	}
 
 	public synchronized void addUnanalyzableClass(AppClass c) {
+		c.deleteExternalInfo();
 		unanalyzableClasses.add(c);
 	}
 
+	
 	public synchronized void incrementAsReturnType(AppType t) {
+		/** EY: this was dragging reference to soot scene
 		int oldVal = 0;
 		if (seenAsReturnType.containsKey(t)) {
 			oldVal = seenAsReturnType.get(t);
 		}
 		seenAsReturnType.put(t, oldVal + 1);
+		**/
 	}
 
 	public synchronized void incrementAsParameterType(AppType t) {
+		/** EY: this was dragging reference to soot scene
 		int oldVal = 0;
 		if (seenAsParameterType.containsKey(t)) {
 			oldVal = seenAsParameterType.get(t);
 		}
 		seenAsParameterType.put(t, oldVal + 1);
+		**/
 	}
 
+	
 	public Set<String> getUncompilableSources() {
 		return uncompilableSources;
 	}
@@ -107,7 +114,7 @@ public class AnalysisDetails extends FieldHolder {
 		if (hc == null) return;
 		for (History h : hc.getHistories()) {
 			try {
-				samples.add(getHistorySample(h));
+				samples.add(getOrCreateHistorySample(h));
 			} catch (InterruptedException e) {
 				// Continue to next sample
 			}
@@ -118,7 +125,7 @@ public class AnalysisDetails extends FieldHolder {
 		return historyBySample.get(s);
 	}
 
-	private Sample getHistorySample(History h) throws InterruptedException, CanceledException {
+	private Sample getOrCreateHistorySample(History h) throws InterruptedException, CanceledException {
 		Sample result = sampleByHistory.get(h);
 		if (result == null) {
 			result = createSample(h);
@@ -140,7 +147,7 @@ public class AnalysisDetails extends FieldHolder {
 		s.setField(Sample.NUM_EDGES, h.getNumEdges());
 		s.setField(Sample.NUM_UNKNOWN_EDGES, h.getNumUnknownEdges());
 		for (History src : h.getSources()) {
-			s.addSample(getHistorySample(src));
+			s.addSample(getOrCreateHistorySample(src));
 		}
 		return s;
 	}

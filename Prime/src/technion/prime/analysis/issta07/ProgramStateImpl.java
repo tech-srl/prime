@@ -9,6 +9,7 @@ import java.util.Set;
 import technion.prime.analysis.soot.SootFlowAnalysis;
 import technion.prime.utils.ConcurrencyUtils;
 import technion.prime.utils.CollectionUtils;
+import technion.prime.utils.Logger;
 import technion.prime.utils.MultiMap;
 import technion.prime.dom.AppAccessPath;
 import technion.prime.dom.AppAnnotation;
@@ -346,11 +347,15 @@ public class ProgramStateImpl implements ProgramState {
 	}
 
 	private boolean isTrackedType(AppType t) {
-		return options.getFilterReported().passesFilter(t.getFullName());
+		boolean result =options.getFilterReported().passesFilter(t.getFullName());
+		//Logger.log(String.format("isTrackedType? %s returned %b",t.getFullName(),result));
+		return result;
 	}
 
 	private boolean isBaseTracked(AppObject appObj) {
-		return options.getFilterBaseTracked().passesFilter(appObj.getType().getFullName());
+		boolean result =options.getFilterBaseTracked().passesFilter(appObj.getType().getFullName());
+		//Logger.log(String.format("isBaseTracked? %s returned %b",appObj.getType().getFullName(),result));
+		return result;
 	}
 
 	@Override

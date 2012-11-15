@@ -19,4 +19,6 @@ public interface AppClass extends Serializable {
 	boolean isPhantom();
 
 	String getClassFileName();
+
+	void deleteExternalInfo();
 }

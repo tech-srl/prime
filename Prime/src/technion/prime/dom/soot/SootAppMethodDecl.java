@@ -10,6 +10,7 @@ import soot.SootMethod;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.graph.UnitGraph;
 
+import technion.prime.utils.Logger;
 import technion.prime.utils.OutputHider;
 import technion.prime.dom.AppMethodDecl;
 
@@ -31,6 +32,8 @@ public class SootAppMethodDecl extends SootSceneItem implements AppMethodDecl {
 
 	public SootAppMethodDecl(Scene scene, SootMethod m) {
 		super(scene);
+		if (m ==null)
+			Logger.log("SootMethod is Null on creation!");
 		signature = signatures.get(m);
 		if (signature == null) {
 			signature = m.getSignature();
@@ -77,7 +80,10 @@ public class SootAppMethodDecl extends SootSceneItem implements AppMethodDecl {
 	public SootMethod getSootMethod() {
 		return m;
 	}
-	
+	/**
+	 * note the insanity, calling this sets m to null, further calls to getSootMethod will therefore return null
+	 * @return
+	 */
 	public UnitGraph getUnitGraph() {
 		if (unitGraph == null) {
 			OutputHider h = new OutputHider();
@@ -93,7 +99,7 @@ public class SootAppMethodDecl extends SootSceneItem implements AppMethodDecl {
 		return unitGraph;
 	}
 	
-	private Body getBody() {
+	public Body getBody() {
 		final SecurityManager baseSecurityManager = System.getSecurityManager();
 		System.setSecurityManager(new SecurityManager() {
 			@Override
@@ -116,6 +122,10 @@ public class SootAppMethodDecl extends SootSceneItem implements AppMethodDecl {
 	@Override
 	public String getSignature() {
 		return signature;
+	}
+
+	public static void reset() {
+		signatures.clear();
 	}
 
 }

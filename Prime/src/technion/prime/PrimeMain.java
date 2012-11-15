@@ -29,6 +29,7 @@ public class PrimeMain {
 		COMPILED("class-files"),
 		COMPILED_IN_JAR("jarred-class-files"),
 		CACHED("cache-file"),
+		CACHED_DIR("cache-folder"),
 		SOURCE("source-files"),
 		QUERY_SIZE("query-size"),
 		OUTPUT_DIR("output-dir"),
@@ -36,6 +37,7 @@ public class PrimeMain {
 		TEMP_DIR("temp-dir"),
 		API_PATTERN("api-pattern"),
 		COMPILE_ONLY("compile-only"),
+		FORCE_CLUSTERING("force-clustering"),
 		;
 
 		String optionString;
@@ -62,10 +64,14 @@ public class PrimeMain {
 				.getOptionValue(PrimeCommandLineOptions.COMPILED.optionString);
 		String jarFolder = line
 				.getOptionValue(PrimeCommandLineOptions.COMPILED_IN_JAR.optionString);
+		String cacheFolder = line
+				.getOptionValue(PrimeCommandLineOptions.CACHED_DIR.optionString);
 		String cacheFile = line
 				.getOptionValue(PrimeCommandLineOptions.CACHED.optionString);
 		boolean compileOnly = line
 				.hasOption(PrimeCommandLineOptions.COMPILE_ONLY.optionString);
+		boolean forceClustering = line
+				.hasOption(PrimeCommandLineOptions.FORCE_CLUSTERING.optionString);
 		
 		Options primeOptions = overrideWith != null? overrideWith :
 			createOptionsFromCommandLineArgs(line);
@@ -92,8 +98,15 @@ public class PrimeMain {
 				files.add(cacheFile);
 				loadedCacheFiles = true;
 			}
+			if (cacheFolder != null) {
+				files.addAll(JavaFileUtils.getCachedFilesInFolder(cacheFolder, true));
+				loadedCacheFiles = true;
+			}
+			
+			
 			for (String f : files) analyzer.addInputFile(f);
 			analyzer.setCompileOnly(compileOnly);
+			analyzer.setForceClustering(forceClustering);
 			hc = analyzer.analyze(! loadedCacheFiles);
 			if (hc == null && compileOnly == false) {
 				Logger.error("Could not generate a HistoryCollection");
@@ -189,11 +202,18 @@ public class PrimeMain {
 				.withArgName("file").hasArg()
 				.withDescription("File containing a cached run")
 				.create('f');
+		Option cached_dir = OptionBuilder
+				.withLongOpt(PrimeCommandLineOptions.CACHED_DIR.optionString)
+				.withArgName("folder").hasArg()
+				.withDescription("Folder containing cache files")
+				.create('u');
+		
 		input.addOption(query);
 		input.addOption(source);
 		input.addOption(compiled);
 		input.addOption(jars);
 		input.addOption(cached);
+		input.addOption(cached_dir);
 
 		Option querySize = OptionBuilder
 				.withLongOpt(PrimeCommandLineOptions.QUERY_SIZE.optionString)
@@ -235,6 +255,11 @@ public class PrimeMain {
 				.withDescription("If present, will only compile source files, will not run analysis")
 				.create("i");
 
+		Option forceClusteringOption = OptionBuilder
+				.withLongOpt(PrimeCommandLineOptions.FORCE_CLUSTERING.optionString)
+				.withDescription("If present, will force clustering")
+				.create("l");
+		
 		options.addOptionGroup(input);
 		options.addOption(querySize);
 		options.addOption(outputDir);
@@ -242,6 +267,7 @@ public class PrimeMain {
 		options.addOption(partialMerge);
 		options.addOption(apiPattern);
 		options.addOption(compileOnlyOption);
+		options.addOption(forceClusteringOption);
 		return options;
 	}
 	

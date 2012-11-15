@@ -31,6 +31,8 @@ public class SootAppMethodRef extends SootSceneItem implements AppMethodRef {
 	
 	public SootAppMethodRef(Scene scene, SootMethodRef m, boolean isPhantom, boolean opaque) {
 		super(scene);
+		// EY: how about we throw the scene away? do we ever need it?
+		deleteScene();
 		if (m.isStatic()) attrs.add(Attribute.STATIC);
 		if (isPhantom) attrs.add(Attribute.PHANTOM);
 		if (opaque) attrs.add(Attribute.OPAQUE);

@@ -37,19 +37,22 @@ public class PartialCompiler {
 			CompilationUnit cu = PPAUtil.getCU(new File(filename), new PPAOptions(), REQ_NAME, false);
 			if (cu == null) throw new LoadException("Could not load compilation unit from file " + filename);
 			loadedFiles.put(filename, new LoadedFile(cu));
+			PPAUtil.cleanUp(cu);
 		}
 		return loadedFiles.get(filename);
 	}
 	
 	private static IProject getPPAProject() {
-		return ResourcesPlugin.getWorkspace().getRoot().getProject(PPAUtil.getPPAProjectName(REQ_NAME));
+		IProject result = ResourcesPlugin.getWorkspace().getRoot().getProject(PPAUtil.getPPAProjectName(REQ_NAME));
+		return result;
 	}
 
 	public static void cleanup() {
 		try {
-			//PPAUtil.cleanUpAll(REQ_NAME);
-			loadedFiles.clear();
+			PPAUtil.cleanUpAll(REQ_NAME);
+			loadedFiles.clear();  
 			getPPAProject().delete(true, true, null);
+			System.gc();
 		} catch (CoreException e) {
 			// Swallow it
 		}

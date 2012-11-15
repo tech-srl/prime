@@ -9,6 +9,7 @@ import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import technion.prime.dom.AppMethodDecl;
+import technion.prime.utils.Logger;
 
 public class SootAppClass extends SootSceneItem implements technion.prime.dom.AppClass {
 	private static final long serialVersionUID = -3148912919142284788L;
@@ -95,10 +96,15 @@ public class SootAppClass extends SootSceneItem implements technion.prime.dom.Ap
 	
 	private List<SootAppMethodDecl> calculateMethods(SootClass c) {
 		List<SootAppMethodDecl> result = new LinkedList<SootAppMethodDecl>();
-		for (SootMethod m : c.getMethods()) {
+		for (SootMethod m : c.getMethods()) {	
 			result.add(new SootAppMethodDecl(scene, m));
 		}
 		return result;
+	}
+
+	@Override
+	public void deleteExternalInfo() {
+		deleteScene();
 	}
 	
 }

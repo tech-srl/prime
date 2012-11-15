@@ -135,9 +135,11 @@ public class ConcurrencyUtils {
 		for (Future<T> f : fs) {
 			try {
 				T t = f.get(timeoutForEach, TimeUnit.MILLISECONDS);
+				//T t = f.get();
 				if (t != null) result.add(t);
 				checkState();
 			} catch (InterruptedException e1) {
+				Logger.log("interrupted");
 				continue;
 			} catch (ExecutionException e1) {
 				if (e1.getCause() instanceof CanceledException) {
@@ -147,7 +149,12 @@ public class ConcurrencyUtils {
 				// Swallow
 			} catch (TimeoutException e1) {
 				f.cancel(true);
-				//factory.interruptAllCreatedThreads();
+				Logger.log("timed out");
+			} catch (OutOfMemoryError oom) {
+				f.cancel(true);
+				Logger.log("OOM-ed");
+				System.gc();
+				//------- was out before --- factory.interruptAllCreatedThreads();
 			}
 		}
 		e.shutdownNow();

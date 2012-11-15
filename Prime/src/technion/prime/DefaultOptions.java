@@ -90,10 +90,10 @@ public class DefaultOptions implements Options {
 				timeout = 30000;
 				break;
 			case COMPILING:
-				timeout = 200;
+				timeout = 20000;
 				break;
 			case ANALYZING:
-				timeout = 5000;
+				timeout = 7000;
 				break;
 			default:
 				return -1;
@@ -236,7 +236,7 @@ public class DefaultOptions implements Options {
 
 	@Override
 	public boolean separateUnknownSources() {
-		return true;
+		return false;
 	}
 	
 }

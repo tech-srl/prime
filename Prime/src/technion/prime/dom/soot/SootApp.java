@@ -47,4 +47,8 @@ public class SootApp implements App {
 		}
 	}
 	
+	public static void reset() {
+		SootAppMethodDecl.reset();
+	}
+	
 }
