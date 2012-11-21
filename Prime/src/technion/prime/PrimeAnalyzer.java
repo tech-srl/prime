@@ -35,6 +35,7 @@ import technion.prime.history.converters.RelaxedInclusionClusterer;
 import technion.prime.history.converters.TypeInclusionClusterer;
 import technion.prime.history.converters.TypeSameClusterer;
 import technion.prime.history.converters.TypeSimilarityClusterer;
+import technion.prime.history.converters.UnknownEliminator;
 import technion.prime.partial_compiler.LoadedFile;
 import technion.prime.partial_compiler.PartialCompiler;
 import technion.prime.partial_compiler.PartialCompiler.LoadException;
@@ -75,10 +76,9 @@ public class PrimeAnalyzer {
 
 	private static final long MB = 1048576;
 
-	private static final String CONVERTERSTACK_FILE = "converters.txt";
-
 	private static ConverterStack converterStack;
-
+	private String converterStackFile; 
+	
 	private final Options options;
 	private final Map<String, Integer> queries = new HashMap<String, Integer>();
 	private final Queue<String> sourceFiles = new LinkedList<String>();
@@ -571,7 +571,8 @@ public class PrimeAnalyzer {
 		TYPE_INCL("type-inclusion","TypeInclusionClusterer"),
 		METHOD_SIM("method-similarity","MethodSimilarityClusterer"),
 		ORDER_SIM("order-similarity","OrderingSimilarityClusterer"),
-		TYPE_SIM("type-similarity","TypeSimilarityClusterer");
+		TYPE_SIM("type-similarity","TypeSimilarityClusterer"),
+		UNKNOWN_ELIM("unknown-elimination","UnknownEliminator");
 		
 		private String name;
 		private String impl; 
@@ -649,6 +650,8 @@ public class PrimeAnalyzer {
 			return new OrderingSimilarityClusterer(options);
 		} else if (line.equals(ConverterTypes.TYPE_SIM.getName())) {
 			return new TypeSimilarityClusterer(options);
+		} else if (line.equals(ConverterTypes.UNKNOWN_ELIM.getName())) {
+			return new UnknownEliminator(options);
 		}
 		Logger.log("oh no, null!");
 		return null;
@@ -660,7 +663,7 @@ public class PrimeAnalyzer {
 
 		ConverterStack result = null;
 		try { 
-			result = readCoverterStackFromFile(CONVERTERSTACK_FILE);
+			result = readCoverterStackFromFile(converterStackFile);
 		} catch (Exception e) {
 			e.printStackTrace(); 
 		}
@@ -718,6 +721,10 @@ public class PrimeAnalyzer {
 	 */
 	public void addCompiledItems(Collection<CompiledItem> items) {
 		compiledItems.addAll(items);
+	}
+
+	public void setConverterStackFile(String converterStackFile) {
+		this.converterStackFile = converterStackFile;
 	}
 
 }

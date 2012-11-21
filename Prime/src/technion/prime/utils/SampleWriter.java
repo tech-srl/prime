@@ -35,13 +35,8 @@ public class SampleWriter {
 	
 	public static void write(Sample s, History h, String folder, String filename) throws IOException {
 		String content = getGvContent(s,h,s.getId());
-
 		filename = folder + File.separator + filename + GRAPHVIZ_SUFFIX;
-
 		FileUtils.writeStringToFile(new File(filename), content);
-
-		Logger.log("Writer: wrote history to " + filename);
-
 	}
 
 	private static String getGvContent(Sample s,History h, String graphId) {

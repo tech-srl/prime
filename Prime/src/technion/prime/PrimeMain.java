@@ -23,7 +23,8 @@ import java.util.regex.Pattern;
 
 public class PrimeMain {
 	private final static boolean DEBUG = false;
-	
+	private static final String DEFAULT_CONVERTER_STACK_FILE = "converters.txt";
+
 	private enum PrimeCommandLineOptions {
 		QUERY("queries"),
 		COMPILED("class-files"),
@@ -38,7 +39,7 @@ public class PrimeMain {
 		API_PATTERN("api-pattern"),
 		COMPILE_ONLY("compile-only"),
 		FORCE_CLUSTERING("force-clustering"),
-		;
+		CONVERTER_STACK_FILE("converter-stack"), ;
 
 		String optionString;
 
@@ -46,15 +47,15 @@ public class PrimeMain {
 			this.optionString = optionString;
 		}
 	}
-	
+
 	public static void main(String[] args) {
 		analyze(args, null);
 	}
-	
+
 	public static HistoryCollection analyze(String[] args, Options overrideWith) {
 		CommandLine line = parseCommandLine(args);
 		if (line == null) return null;
-		
+
 		String query = line.getOptionValue(PrimeCommandLineOptions.QUERY.optionString);
 		String numResultsStr = line.getOptionValue(
 				PrimeCommandLineOptions.QUERY_SIZE.optionString);
@@ -72,9 +73,11 @@ public class PrimeMain {
 				.hasOption(PrimeCommandLineOptions.COMPILE_ONLY.optionString);
 		boolean forceClustering = line
 				.hasOption(PrimeCommandLineOptions.FORCE_CLUSTERING.optionString);
-		
-		Options primeOptions = overrideWith != null? overrideWith :
-			createOptionsFromCommandLineArgs(line);
+		String converterStackFile = line
+				.getOptionValue(PrimeCommandLineOptions.CONVERTER_STACK_FILE.optionString);
+
+		Options primeOptions = overrideWith != null ? overrideWith :
+				createOptionsFromCommandLineArgs(line);
 
 		PrimeAnalyzer analyzer = new PrimeAnalyzer(primeOptions);
 		HistoryCollection hc;
@@ -102,12 +105,18 @@ public class PrimeMain {
 				files.addAll(JavaFileUtils.getCachedFilesInFolder(cacheFolder, true));
 				loadedCacheFiles = true;
 			}
-			
-			
-			for (String f : files) analyzer.addInputFile(f);
+
+			if (converterStackFile != null) {
+				analyzer.setConverterStackFile(converterStackFile);
+			} else {
+				analyzer.setConverterStackFile(DEFAULT_CONVERTER_STACK_FILE);
+			}
+
+			for (String f : files)
+				analyzer.addInputFile(f);
 			analyzer.setCompileOnly(compileOnly);
 			analyzer.setForceClustering(forceClustering);
-			hc = analyzer.analyze(! loadedCacheFiles);
+			hc = analyzer.analyze(!loadedCacheFiles);
 			if (hc == null && compileOnly == false) {
 				Logger.error("Could not generate a HistoryCollection");
 				return null;
@@ -117,13 +126,13 @@ public class PrimeMain {
 			e.printStackTrace();
 			return null;
 		}
-		
+
 		Logger.debug("Mining done, total time: " +
 				Logger.formattedDuration(analyzer.getDuration()));
 
 		return hc;
 	}
-	
+
 	public static Options createOptionsFromCommandLineArgs(CommandLine line) {
 		final String outputDir = line.getOptionValue(
 				PrimeCommandLineOptions.OUTPUT_DIR.optionString,
@@ -141,37 +150,64 @@ public class PrimeMain {
 			apiFilter = new StringFilter(apiPattern, StringFilter.PATTERN_MATCH_NONE, true, false);
 		}
 		final StringFilter apiFilter2 = apiFilter;
-		
+
 		return new DefaultOptions() {
 			private static final long serialVersionUID = 5051441602752092277L;
-			
-			@Override public String getTempDir() { return tempDir; }
-			@Override public String getOutputDir() { return outputDir; }
-			@Override public boolean isMethodSimilarityUnionPartial() { return partialMerge; }
+
+			@Override
+			public String getTempDir() {
+				return tempDir;
+			}
+
+			@Override
+			public String getOutputDir() {
+				return outputDir;
+			}
+
+			@Override
+			public boolean isMethodSimilarityUnionPartial() {
+				return partialMerge;
+			}
+
 			@SuppressWarnings("unused")
-			@Override public long getSingleActionTimeout(Stage stage) {
+			@Override
+			public long getSingleActionTimeout(Stage stage) {
 				if (DEBUG && stage == Stage.ANALYZING) return Integer.MAX_VALUE;
 				return super.getSingleActionTimeout(stage);
 			}
-			@Override public boolean shouldShowExceptions() { return DEBUG; }
-			@Override public StringFilter getFilterOpaqueTypes() {
-				return apiFilter2 == null ? super.getFilterOpaqueTypes() : apiFilter2;
-			}
-			@Override public StringFilter getFilterReported() {
-				return apiFilter2 == null ? super.getFilterOpaqueTypes() : apiFilter2;
-			}
-			@Override public boolean useHistoryInvariant() {
+
+			@Override
+			public boolean shouldShowExceptions() {
 				return DEBUG;
 			}
-			@Override public boolean shouldCluster() {
+
+			@Override
+			public StringFilter getFilterOpaqueTypes() {
+				return apiFilter2 == null ? super.getFilterOpaqueTypes() : apiFilter2;
+			}
+
+			@Override
+			public StringFilter getFilterReported() {
+				return apiFilter2 == null ? super.getFilterOpaqueTypes() : apiFilter2;
+			}
+
+			@Override
+			public boolean useHistoryInvariant() {
+				return DEBUG;
+			}
+
+			@Override
+			public boolean shouldCluster() {
 				return false;
 			}
-			@Override public boolean isMayAnalysis() {
+
+			@Override
+			public boolean isMayAnalysis() {
 				return false;
 			}
 		};
 	}
-	
+
 	@SuppressWarnings("static-access")
 	private static org.apache.commons.cli.Options buildOptions() {
 		org.apache.commons.cli.Options options = new org.apache.commons.cli.Options();
@@ -207,14 +243,19 @@ public class PrimeMain {
 				.withArgName("folder").hasArg()
 				.withDescription("Folder containing cache files")
 				.create('u');
-		
+		Option converterStackFile = OptionBuilder
+				.withLongOpt(PrimeCommandLineOptions.CONVERTER_STACK_FILE.optionString)
+				.withArgName("file").hasArg()
+				.withDescription("converter stack file")
+				.create("v");
+
 		input.addOption(query);
 		input.addOption(source);
 		input.addOption(compiled);
 		input.addOption(jars);
 		input.addOption(cached);
 		input.addOption(cached_dir);
-
+		
 		Option querySize = OptionBuilder
 				.withLongOpt(PrimeCommandLineOptions.QUERY_SIZE.optionString)
 				.withArgName("integer")
@@ -230,7 +271,7 @@ public class PrimeMain {
 				.withDescription(
 						"Directory to save the output in")
 				.create('o');
-		
+
 		Option tempDir = OptionBuilder
 				.withLongOpt(PrimeCommandLineOptions.TEMP_DIR.optionString)
 				.withArgName("temp")
@@ -243,23 +284,25 @@ public class PrimeMain {
 				.withLongOpt(PrimeCommandLineOptions.MERGE_PARTIAL.optionString)
 				.withDescription("Use partial merge during")
 				.create('m');
-		
+
 		Option apiPattern = OptionBuilder
 				.withLongOpt(PrimeCommandLineOptions.API_PATTERN.optionString)
 				.hasArg()
-				.withDescription("Classes matching this regex pattern will be considered API classes")
+				.withDescription(
+						"Classes matching this regex pattern will be considered API classes")
 				.create('a');
-		
+
 		Option compileOnlyOption = OptionBuilder
 				.withLongOpt(PrimeCommandLineOptions.COMPILE_ONLY.optionString)
-				.withDescription("If present, will only compile source files, will not run analysis")
+				.withDescription(
+						"If present, will only compile source files, will not run analysis")
 				.create("i");
 
 		Option forceClusteringOption = OptionBuilder
 				.withLongOpt(PrimeCommandLineOptions.FORCE_CLUSTERING.optionString)
 				.withDescription("If present, will force clustering")
 				.create("l");
-		
+
 		options.addOptionGroup(input);
 		options.addOption(querySize);
 		options.addOption(outputDir);
@@ -268,14 +311,16 @@ public class PrimeMain {
 		options.addOption(apiPattern);
 		options.addOption(compileOnlyOption);
 		options.addOption(forceClusteringOption);
+		options.addOption(converterStackFile);
+		
 		return options;
 	}
-	
+
 	private static CommandLine parseCommandLine(String[] args) {
 		org.apache.commons.cli.Options options = buildOptions();
 		CommandLineParser parser = new GnuParser();
 		CommandLine line = null;
-		
+
 		try {
 			line = parser.parse(options, args);
 			printOptions(line);
@@ -287,7 +332,7 @@ public class PrimeMain {
 		}
 		return line;
 	}
-	
+
 	private static void printOptions(CommandLine line) {
 		for (PrimeCommandLineOptions po : PrimeCommandLineOptions.values()) {
 			String option = po.optionString;
