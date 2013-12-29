@@ -74,7 +74,7 @@ public class SootFlowAnalysis extends ForwardFlowAnalysis<Unit, ProgramState> {
 	private final SootMethod method;
 	private final Options options;
 	private List<AppObject> inputArgs;
-	
+	private int flowedThrough;
 	/**
 	 * @param options Prime options.
 	 * @param analyzer The analyzer running this analysis. The analyzer is used for analyzing called method
@@ -127,7 +127,10 @@ public class SootFlowAnalysis extends ForwardFlowAnalysis<Unit, ProgramState> {
 	@Override
 	protected void flowThrough(ProgramState in, Unit u, ProgramState out) {
 		checkInterrupted();
-		
+		//add counter for analysis if 10k flowthrough, abort
+		if (flowedThrough > 10000)
+			throw new RuntimeInterruptedException(new Exception("abort"));
+		++flowedThrough;
 		try {
 			Label label = createLabel(u);
 			out.copyFrom(in);
