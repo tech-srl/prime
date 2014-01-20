@@ -156,6 +156,10 @@ public class ConcurrencyUtils {
 				System.gc();
 				//------- was out before --- factory.interruptAllCreatedThreads();
 			}
+			finally
+			{
+				f.cancel(true);
+			}
 		}
 		e.shutdownNow();
 		return result;

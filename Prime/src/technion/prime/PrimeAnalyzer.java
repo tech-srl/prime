@@ -150,7 +150,7 @@ public class PrimeAnalyzer {
 
 		setupActiveQuery();
 
-		HistoryCollection analyzed = produceHistoryCollection();
+		HistoryCollection analyzed = produceHistoryCollection(); //real analysis
 		if (compileOnly) return null;
 
 		HistoryCollection clustered = analyzed;
@@ -307,7 +307,8 @@ public class PrimeAnalyzer {
 			if (counter % 100 == 0) {
 				Logger.log(String.format("---Analyzed %d classes.\n", counter));
 			}
-			if (itemsInChunk.size() >= 20/* options.getAnalysisChunkSize() */
+			//change this to 1 at a time
+			if (itemsInChunk.size() >= 5/* options.getAnalysisChunkSize() */
 					|| counter == compiledItems.size()) {
 				try {
 					ConcurrencyUtils.checkState();
