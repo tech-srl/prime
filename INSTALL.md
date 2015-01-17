@@ -8,7 +8,7 @@ Prime is implemented as an Eclipse plugin. It can either be ran from within Ecli
 * Some sort of Subversion client, e.g. Eclipse's [Subclipse plugin](subclipse.tigris.org/).
 
 ##Download Prime
-Check out the "State" branch of Prime: svn://svn.code.sf.net/p/priming/code-0/branches/State
+Checkout the master branch here on github.com/tech-srl/prime 
 
 ##Download the PPA plugin
 ###How to obtain the PPA plugin projects###
