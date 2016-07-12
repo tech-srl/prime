@@ -37,4 +37,4 @@ How to install Prime
 How to get Prime running
 
 ##License
-Prime is released under the Eclipse Public License.
+Prime is released under the Apache 2.0 License.
